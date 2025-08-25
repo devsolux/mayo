@@ -4,3 +4,8 @@ build-*
 custom.pri
 env.pri
 cmake/CustomSteps.cmake
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

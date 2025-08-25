@@ -2,7 +2,7 @@ name: macOS-conda arm64
 
 on:
   release:
-    types: [created]
+    types: [ created ]
   push:
     tags:
       - 'v*.*.*'
@@ -32,31 +32,34 @@ jobs:
         uses: SimenB/github-actions-cpu-cores@v2
 
       - name: Set Conda Environment
-        uses: conda-incubator/setup-miniconda@v3
+        uses: mamba-org/setup-micromamba@v2
         with:
-          miniconda-version: "latest"
-          auto-activate-base: false
-          activate-environment: ci_macos_conda
+          environment-name: ci_macos_conda
+          init-shell: bash
           channels: conda-forge
           channel-priority: strict
-          use-mamba: true
           cache-downloads: true
-
-      - name: Install dependencies (Qt5, OCCT, Assimp, build tools)
-        run: |
-          mamba install -y \
-            qt=5.* \
-            occt \
-            assimp \
-            cmake \
-            ninja \
+          # Optional: speed up subsequent runs by caching the whole env
+          # cache-environment: true
+          create-args: >-
+            python=3.11
+            qt=5.*
+            occt
+            assimp
+            cmake
+            ninja
             pkg-config
+
+      - name: Verify toolchain
+        run: |
           echo "Conda prefix: $CONDA_PREFIX"
-          qtpaths || true
+          echo "PATH: $PATH"
+          which cmake && cmake --version
+          which ninja && ninja --version
+          which qtpaths || true
+          qtpaths --qt-version || true
           which macdeployqt || true
           macdeployqt -version || true
-          cmake --version
-          ninja --version
 
       - name: Configure and Build
         run: |
